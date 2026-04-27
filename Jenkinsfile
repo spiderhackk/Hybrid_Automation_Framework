@@ -3,9 +3,6 @@ pipeline {
         label 'local-machine'
     }
 
-    tools {
-        maven 'Maven-3'
-    }
 
     options {
         timestamps()
