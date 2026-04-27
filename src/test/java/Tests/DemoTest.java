@@ -5,6 +5,7 @@ import org.apache.commons.io.FileUtils;
 import org.example.Pages.DemoAppPage;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.testng.Assert;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
@@ -22,26 +23,34 @@ import java.util.List;
 
 public class DemoTest extends BaseTest {
     WebDriver driver;
+    DemoAppPage demoAppPage ;
 
     @BeforeMethod
     public void launchApp(){
         this.driver=setup();
+        demoAppPage =new DemoAppPage(driver);
     }
 
     @Test()
-    public void demoTest() throws IOException {
+    public void brokenLinksTest(){
 
-        DemoAppPage demoAppPage = new DemoAppPage(driver);
-        demoAppPage.handle();
+        demoAppPage.brokenLinks();
+
+//        Assert.assertEquals("Demo","Dem");
         }
 
-//    @DataProvider(name="login")
-//    public Object[][] getData(){
-//        return new Object[][]{
-//                {"username","boss"},
-//                {"username","me"},
-//        };
-//    }
+    @Test()
+    public void handleMouseAction() {
+
+        demoAppPage.handleMouseActions();
+    }
+
+    @Test()
+    public void handleAlerts(){
+        demoAppPage.handleAlerts();
+    }
+
+
 }
 
 

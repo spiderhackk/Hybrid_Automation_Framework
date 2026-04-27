@@ -1,22 +1,28 @@
 package TestComponents;
 
+import org.apache.commons.io.FileUtils;
 import org.example.DriverFactory.DriverFactory;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeMethod;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Properties;
 
 public class BaseTest {
-    WebDriver driver;
 
     private Properties prop;
 
     public BaseTest(){
+
         prop = new Properties();
         try {
             FileInputStream fis = new FileInputStream(
@@ -46,13 +52,16 @@ public class BaseTest {
 
     public WebDriver setup(){
         DriverFactory.initDriver();
-        driver = DriverFactory.getDriver();
+        WebDriver driver = DriverFactory.getDriver();
+        driver.manage().window().maximize();
         String url = getUrl();
         driver.get(url);
     return driver;
     }
 
-    @AfterTest
+
+
+    @AfterMethod
     public void tearDown(){
        DriverFactory.quitDriver();
     }

@@ -1,12 +1,18 @@
 pipeline {
-    agent any
+    agent {
+        label 'local-machine'
+    }
 
     tools {
         maven 'Maven-3'
     }
 
-    stages {
+    options {
+        timestamps()
+        disableConcurrentBuilds()
+    }
 
+    stages {
         stage('Checkout Code') {
             steps {
                 git branch: 'main',
@@ -14,7 +20,14 @@ pipeline {
             }
         }
 
-        stage('Build') {
+        stage('Verify Environment') {
+            steps {
+                sh 'java -version'
+                sh 'mvn -version'
+            }
+        }
+
+        stage('Clean Build') {
             steps {
                 sh 'mvn clean compile'
             }
@@ -25,20 +38,25 @@ pipeline {
                 sh 'mvn test'
             }
         }
-
-        stage('Package') {
-            steps {
-                sh 'mvn package'
-            }
-        }
     }
 
     post {
+        always {
+            archiveArtifacts artifacts: 'reports/**, screenshots/**, target/surefire-reports/**', allowEmptyArchive: true
+            publishHTML(target: [
+                allowMissing: true,
+                alwaysLinkToLastBuild: true,
+                keepAll: true,
+                reportDir: 'reports',
+                reportFiles: 'report.html',
+                reportName: 'Extent Report'
+            ])
+        }
         success {
-            echo 'Pipeline SUCCESS 🚀'
+            echo 'Pipeline SUCCESS'
         }
         failure {
-            echo 'Pipeline FAILED ❌'
+            echo 'Pipeline FAILED'
         }
     }
 }
