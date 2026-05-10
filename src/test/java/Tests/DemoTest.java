@@ -25,13 +25,13 @@ public class DemoTest extends BaseTest {
     WebDriver driver;
     DemoAppPage demoAppPage ;
 
-    @BeforeMethod
+    @BeforeMethod(alwaysRun = true)
     public void launchApp(){
         this.driver=setup();
         demoAppPage =new DemoAppPage(driver);
     }
 
-    @Test()
+    @Test( groups = "sanity")
     public void brokenLinksTest(){
 
         demoAppPage.brokenLinks();
@@ -39,13 +39,13 @@ public class DemoTest extends BaseTest {
 //        Assert.assertEquals("Demo","Dem");
         }
 
-    @Test()
+    @Test(groups = {"regression"})
     public void handleMouseAction() {
 
         demoAppPage.handleMouseActions();
     }
 
-    @Test()
+    @Test(groups = {"regression"})
     public void handleAlerts(){
         demoAppPage.handleAlerts();
     }

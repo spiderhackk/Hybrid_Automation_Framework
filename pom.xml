@@ -58,7 +58,8 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.2.5</version>
                 <configuration>
-                    <!-- Run groups from command line -->
+                    <!--suppress UnresolvedMavenProperty -->
+                    <groups>${groups}</groups>
                     <suiteXmlFiles>
                         <suiteXmlFile>testng.xml</suiteXmlFile>
                     </suiteXmlFiles>

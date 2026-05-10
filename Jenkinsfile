@@ -2,7 +2,14 @@ pipeline {
     agent {
         label 'local-machine'
     }
-
+    parameters {
+            // This creates a dropdown menu in Jenkins
+            choice(
+                name: 'TEST_GROUP',
+                choices: ['sanity', 'regression', 'all'],
+                description: 'Select  TestNG group to run'
+            )
+        }
 
     options {
         timestamps()
@@ -12,28 +19,39 @@ pipeline {
     stages {
         stage('Checkout Code') {
             steps {
+                echo 'Pulling latest code from GitHub...'
                 git branch: 'main',
                     url: 'git@github.com:spiderhackk/Hybrid_Automation_Framework.git'
             }
         }
 
-        stage('Verify Environment') {
+
+        stage('Build Docker Image') {
             steps {
-                sh 'java -version'
-                sh 'mvn -version'
+                echo 'Creating the Docker environment...'
+                sh 'docker build -t automation-agent .'
             }
         }
 
-        stage('Clean Build') {
-            steps {
-                sh 'mvn clean compile'
+        stage('Quality Check : Sanity'){
+            steps{
+                echo 'Checking env by running the sanity test'
+                sh 'docker run --rm -v ${WORKSPACE}:/app automation-agent -Dgroups="sanity"'
             }
         }
 
         stage('Run Tests') {
             steps {
-                sh 'mvn test'
-            }
+                echo 'Executing Selenium Tests with Group: ${params.TEST_GROUP}...'
+                script {
+                            if (params.TEST_GROUP == 'all') {
+                                // Runs everything if 'all' is selected
+                                sh "docker run --rm -v ${WORKSPACE}:/app automation-agent mvn clean test"
+                            } else {
+                                // Passes the specific group from the dropdown
+                                sh "docker run --rm -v ${WORKSPACE}:/app automation-agent mvn clean test -Dgroups=${params.TEST_GROUP}"
+                            }
+                }
         }
     }
 
