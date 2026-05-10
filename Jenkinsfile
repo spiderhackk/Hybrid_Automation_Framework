@@ -36,7 +36,7 @@ pipeline {
         stage('Quality Check : Sanity') {
             steps {
                 echo 'Checking env by running the sanity test'
-                sh 'docker run --rm -v ${WORKSPACE}:/app automation-agent -Dgroups="sanity"'
+                sh 'docker run --rm -v ${WORKSPACE}:/app automation-agent mvn clean test -Dgroups="sanity"'
             }
         }
 
