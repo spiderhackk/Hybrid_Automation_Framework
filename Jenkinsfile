@@ -2,14 +2,15 @@ pipeline {
     agent {
         label 'local-machine'
     }
+
     parameters {
-            // This creates a dropdown menu in Jenkins
-            choice(
-                name: 'TEST_GROUP',
-                choices: ['sanity', 'regression', 'all'],
-                description: 'Select  TestNG group to run'
-            )
-        }
+        // This creates a dropdown menu in Jenkins
+        choice(
+            name: 'TEST_GROUP',
+            choices: ['sanity', 'regression', 'all'],
+            description: 'Select TestNG group to run'
+        )
+    }
 
     options {
         timestamps()
@@ -25,7 +26,6 @@ pipeline {
             }
         }
 
-
         stage('Build Docker Image') {
             steps {
                 echo 'Creating the Docker environment...'
@@ -33,8 +33,8 @@ pipeline {
             }
         }
 
-        stage('Quality Check : Sanity'){
-            steps{
+        stage('Quality Check : Sanity') {
+            steps {
                 echo 'Checking env by running the sanity test'
                 sh 'docker run --rm -v ${WORKSPACE}:/app automation-agent -Dgroups="sanity"'
             }
@@ -44,14 +44,15 @@ pipeline {
             steps {
                 echo 'Executing Selenium Tests with Group: ${params.TEST_GROUP}...'
                 script {
-                            if (params.TEST_GROUP == 'all') {
-                                // Runs everything if 'all' is selected
-                                sh "docker run --rm -v ${WORKSPACE}:/app automation-agent mvn clean test"
-                            } else {
-                                // Passes the specific group from the dropdown
-                                sh "docker run --rm -v ${WORKSPACE}:/app automation-agent mvn clean test -Dgroups=${params.TEST_GROUP}"
-                            }
+                    if (params.TEST_GROUP == 'all') {
+                        // Runs everything if 'all' is selected
+                        sh "docker run --rm -v ${WORKSPACE}:/app automation-agent mvn clean test"
+                    } else {
+                        // Passes the specific group from the dropdown
+                        sh "docker run --rm -v ${WORKSPACE}:/app automation-agent mvn clean test -Dgroups=${params.TEST_GROUP}"
+                    }
                 }
+            }
         }
     }
 
@@ -67,9 +68,11 @@ pipeline {
                 reportName: 'Extent Report'
             ])
         }
+
         success {
             echo 'Pipeline SUCCESS'
         }
+
         failure {
             echo 'Pipeline FAILED'
         }
