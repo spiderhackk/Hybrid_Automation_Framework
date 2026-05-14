@@ -3,16 +3,23 @@ package org.example.CommonUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.time.Duration;
 import java.util.List;
 
 public class commonUtil {
     private final WebDriver driver;
+    private final AutoHealLocator autoHealLocator;
+    private final WebDriverWait wait;
 
     public commonUtil(WebDriver driver) {
         this.driver = driver;
+        this.autoHealLocator = new AutoHealLocator(driver);
+        this.wait = new WebDriverWait(driver, Duration.ofSeconds(10));
     }
 
     public JavascriptExecutor js() {
@@ -33,13 +40,20 @@ public class commonUtil {
     }
 
     public WebElement getElement(String locator) {
-        WebElement element = driver.findElement(checkLocatorType(locator));
+        WebElement element = findElement(locator, checkLocatorType(locator));
         scrollToElement(element);
         return element;
     }
 
     public List<WebElement> getElements(String locator) {
-        return driver.findElements(checkLocatorType(locator));
+        By by = checkLocatorType(locator);
+        List<WebElement> elements = driver.findElements(by);
+        if (!elements.isEmpty()) {
+            autoHealLocator.capture(locator, by, elements.get(0));
+            return elements;
+        }
+
+        return List.of(autoHealLocator.findHealedElement(locator, by));
     }
 
     public void scrollToElement(WebElement element) {
@@ -50,7 +64,7 @@ public class commonUtil {
     }
 
     public void scrollToElement(String locator) {
-        scrollToElement(driver.findElement(checkLocatorType(locator)));
+        scrollToElement(getElement(locator));
     }
 
     public void click(String locator) {
@@ -65,6 +79,45 @@ public class commonUtil {
 
     public String getText(String locator) {
         return getElement(locator).getText();
+    }
+
+    public WebElement waitForVisibleElement(String locator) {
+        return wait.until(driver -> {
+            try {
+                WebElement element = getElement(locator);
+                return element.isDisplayed() ? element : null;
+            } catch (NoSuchElementException | StaleElementReferenceException e) {
+                return null;
+            }
+        });
+    }
+
+    public String waitForVisibleText(String locator) {
+        return waitForVisibleElement(locator).getText();
+    }
+
+    public void waitForText(String locator, String expectedText) {
+        wait.until(driver -> {
+            try {
+                return getElement(locator).getText().contains(expectedText);
+            } catch (NoSuchElementException | StaleElementReferenceException e) {
+                return false;
+            }
+        });
+    }
+
+    public void waitForNumberOfElements(String locator, int minCount) {
+        wait.until(driver -> getElements(locator).size() > minCount);
+    }
+
+    private WebElement findElement(String locator, By by) {
+        try {
+            WebElement element = driver.findElement(by);
+            autoHealLocator.capture(locator, by, element);
+            return element;
+        } catch (NoSuchElementException e) {
+            return autoHealLocator.findHealedElement(locator, by);
+        }
     }
 
     private boolean isXpath(String locator) {

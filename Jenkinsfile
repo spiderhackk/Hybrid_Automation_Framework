@@ -20,9 +20,8 @@ pipeline {
     stages {
         stage('Checkout Code') {
             steps {
-                echo 'Pulling latest code from GitHub...'
-                git branch: 'main',
-                    url: 'git@github.com:spiderhackk/Hybrid_Automation_Framework.git'
+                echo 'Checking out code from Jenkins SCM configuration...'
+                checkout scm
             }
         }
 

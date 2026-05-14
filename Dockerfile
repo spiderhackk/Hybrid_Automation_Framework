@@ -8,6 +8,8 @@ RUN apt-get update && apt-get install -y wget gnupg \
     && echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list \
     && apt-get update && apt-get install -y google-chrome-stable
 
+
+RUN mvn dependency:go-offline
 # 3. Set the working directory inside the container
 WORKDIR /app
 
